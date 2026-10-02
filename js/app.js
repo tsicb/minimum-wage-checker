@@ -104,37 +104,74 @@
     els.resultCaption.textContent=`${items.length.toLocaleString('ja-JP')}ä»¶ã‚’è¡¨ç¤ºå¯¾è±¡ã«ã—ã¦ã„ã¾ã™ã€‚1ãƒšãƒ¼ã‚¸${state.pageSize}ä»¶ã€‚`;
   }
 
-  function leftHeaders(){ return ['ç·Šæ€¥åº¦','ç·åˆåˆ¤å®š','æ±‚äººç®¡ç†ç•ªå·','å…¬é–‹çŠ¶æ…‹','é›‡ç”¨å½¢æ…‹','éƒ½å“åºœçœŒ','æœ€ä½Žè³ƒé‡‘','æ”¹å®šæ—¥','é€šå¸¸è³ƒé‡‘åˆ¤å®š','å›ºå®šæ®‹æ¥­åˆ¤å®š','è©¦ç”¨è³ƒé‡‘åˆ¤å®š','è©¦ç”¨å›ºå®šæ®‹æ¥­åˆ¤å®š','åŽšåŠ´çœURL']; }
-  function leftValues(r){ return [r.urgency,r.overall,re.jobId,re.publication,re.employment,re.prefecture,re.minimumWage,re.effectiveDate,r.regular.message,re.fixedOvertime.message,re.trialRegular.message,re.trialFixedOvertime.message,re.sourceUrl]; }
-  function originalHeadersForExport(){
-    const set=new Set(leftHeaders()); return state.headers.filter(h=>!set.has(h));
-  }
-  function exportMatrix(items){
-    const left=leftHeaders(),original=originalHeadersForExport();
+  function leftHeaders(){ return ['ç·Šæ€¥åº¦','ç·åˆåˆ¤å®š','æ±‚äººç®¡ç†ç•ªå·','å…¬é–‹çŠ¶æ…‹','é›‡ç”¨å½¢æ…‹','éƒ½é“åºœçœŒ','æœ€ä½Žè³ƒé‡‘','æ”¹å®šæ—¥','é€šå¸¸è³ƒé‡‘åˆ¤å®š','å›ºå®šæ®‹æ¥­åˆ¤å®š','è©¦ç”¨è³ƒé‡‘åˆ¤å®š','è©¦ç”¨å›ºå®šæ®‹æ¥­åˆ¤å®š','åŽšåŠ´çœURL']; }
+  function originalHeadersForExport(){ return state.headers.filter(h=>h!=='æ±‚äººç®¡ç†ç•ªå·'); }
+  function leftValues(r){ const f=core.flattenForExport(r); return leftHeaders().map(h=>f[h]); }
+  function exportMatrix(items){ const headers=[...leftHeaders(),...originalHeadersForExport()]; const rows=items.map(({row,result})=>[...leftValues(result),...originalHeadersForExport().map(h=>row[h]??'')]); return {headers,rows}; }
 
-    return {headers:[...left,...original],rows:items.map(({row,result:r})=>[...leftValues(r),...original.map(h=>row[h]??'')])};
-  }
   function csvEscape(v){ const x=String(v??''); return /[",\r\n]/.test(x)?`"${x.replace(/"/g,'""')}"`:x; }
-  function makeCsvText(matrix){ return [matrix.headers,...matrix.rows].map(r=>r.map(csvEscape).join(',')).•©½¥¸ qÉq¸œ¤ìô(€™Õ¹Ñ¥½¸‘½Ý¹±½…‘	±½ˆ¡‰±½ˆ±¹…µ”¥ì½¹ÍÐÕÉ°õUI0¹É•…Ñ•=‰©•ÑUI0¡‰±½ˆ¤±„õ‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð „œ¤ì„¹¡É•˜õÕÉ°í„¹‘½Ý¹±½…õ¹…µ”í‘½Õµ•¹Ð¹‰½‘ä¹…ÁÁ•¹‘¡¥±¡„¤í„¹±¥¬ ¤í„¹É•µ½Ù” ¤íÍ•ÑQ¥µ•½ÕÐ  ¤ôùUI0¹É•Ù½­•=‰©•ÑUI0¡ÕÉ°¤°ÄÀÀÀ¤ìô(€™Õ¹Ñ¥½¸‰…Í•9…µ” ¥ìÉ•ÑÕÉ¸€¡ÍÑ…Ñ”¹™¥±•9…µ•ñðÉ•ÍÕ±Ðœ¤¹É•Á±…” ½p¹ÍØ½¤°œœ¤¹É•Á±…” ½mqp¼è¨üˆðùñt½œ°|œ¤ìô(€™Õ¹Ñ¥½¸‘…Ñ•MÑ…µÀ ¥ìÉ•ÑÕÉ¸€¡•±Ì¹…¹…±åÍ¥Í…Ñ”¹Ù…±Õ•ññÑ½‘…å1½…° ¤¤¹É•Á±…” ¼´½œ°œœ¤ìô(€™Õ¹Ñ¥½¸‘½Ý¹±½…‘ÍØ¡¥Ñ•µÌ±ÍÕ™™¥à¥ì(€€€½¹ÍÐÑ•áÐõµ…­•ÍÙQ•áÐ¡•áÁ½ÉÑ5…ÑÉ¥à¡¥Ñ•µÌ¤¤ì(€€€½¹ÍÐÕ¹¥½‘”õ¹½‘¥¹œ¹ÍÑÉ¥¹Q½½‘”¡Ñ•áÐ¤±Í©¥Ìõ¹½‘¥¹œ¹½¹Ù•ÉÐ¡Õ¹¥½‘”±íÑ¼èM)%Lœ±™É½´èU9%=ô¤±‰åÑ•Ìõ¹•ÜU¥¹ÐáÉÉ…ä¡Í©¥Ì¤ì(€€€‘½Ý¹±½…‘	±½ˆ¡¹•Ü	±½ˆ¡m‰åÑ•Ít±íÑåÁ”èÑ•áÐ½ÍØí¡…ÉÍ•ÐõÍ¡¥™Ñ}©¥Ìô¤±€‘í‰…Í•9…µ” ¥õšr’ö;¢Î¦G–"“–ºi|‘í‘…Ñ•MÑ…µÀ ¥ô‘íÍÕ™™¥áñðœô¹ÍÙ€¤ì(€ô((€™Õ¹Ñ¥½¸‘•Ñ…¥±Y…±Õ”¡„±­•ä¥ì½¹ÍÐØõ„˜™…m­•åtìÉ•ÑÕÉ¸ÑåÁ•½˜Øôôô¹Õµ‰•Èœ˜™9Õµ‰•È¹¥Í¥¹¥Ñ”¡Ø¤ýØé¹Õ±°ìô(€…Íå¹Œ™Õ¹Ñ¥½¸‘½Ý¹±½…‘á•° ¥ì(€€€½¹ÍÐÝˆõ¹•Üá•±)L¹]½É­‰½½¬ ¤ìÝˆ¹É•…Ñ½Èôµ¥¹¥µÕ´µÝ…”µ¡•­•ÈœìÝˆ¹É•…Ñ•õ¹•Ü…Ñ” ¤ì(€€€½¹ÍÐÍÕµµ…ÉäõÝˆ¹…‘‘]½É­Í¡••Ð ŸŽ
-×Ž{Ž«ŽrÌœ±íÙ¥•ÝÌémíÍÑ…Ñ”è™É½é•¸œ±åMÁ±¥ÐèÅõuô¤ì(€€€ÍÕµµ…Éä¹½±Õµ¹ÌõmíÝ¥‘Ñ èÈÑô±íÝ¥‘Ñ èÄÙõtìÍÕµµ…Éä¹…‘‘I½Ü¡lŸ¦‚žn°œ°Ÿ’îÛšVÀt¤ì½¹ÍÐÙ…±Ìõml–£šÆ’êëœœ±ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹±•¹Ñ¡t±lŸšr’ö;¢Î¦G–&ËŽ
-0œ±ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùà¹É•ÍÕ±Ð¹½Ù•É…±°ôôôŸšr’ö;¢Î¦G–&ËŽ
-0œ¤¹±•¹Ñ¡t±lŸžÞ+’Tœ±ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùà¹É•ÍÕ±Ð¹ÕÉ•¹äôôôŸžÞ+š”œ¤¹±•¹Ñ¡t±lŸšRç–ºk–&7¢š–¾û–þpœ±ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùà¹É•ÍÕ±Ð¹ÕÉ•¹äôôôŸšRç–ºk–&7¢š–¾û–þpœ¤¹±•¹Ñ¡t±lŸ¢šžŠë¢ª4œ±ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùà¹É•ÍÕ±Ð¹½Ù•É…±°ôôôŸ¢šžŠë¢ª4œ¤¹±•¹Ñ¡t±l=,œ±ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùà¹É•ÍÕ±Ð¹½Ù•É…±°ôôô=,œ¤¹±•¹Ñ¡t±lŸ–¾û¢Æ‡–’X(ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùà¹É•ÍÕ±Ð¹½Ù•É…±°ôôôŸ–¾û¢Æ‡–’Xœ¤¹±•¹Ñ¡utì(€€€Ù…±Ì¹™½É… ¡ØôùÍÕµµ…Éä¹…‘‘I½Ü¡Ø¤¤ìÍÑå±•!•…‘•È¡ÍÕµµ…Éä¹•ÑI½Ü Ä¤¤ì(€€€ÍÕµµ…Éä¹…‘‘I½Ü¡mt¤ìÍÕµµ…Éä¹…‘‘I½Ü¡l¦÷¦O–êsžr3Œœ°Ÿšr’ö;¢Î¦G–&ËŽ
-3’îÛšVÀt¤ìÍÑå±•!•…‘•È¡ÍÕµµ…Éä¹•ÑI½Ü¡ÍÕµµ…Éä¹É½Ý½Õ¹Ð¤¤ì(€€€½¹ÍÐ‰åAÉ•˜õíôìÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùà¹É•ÍÕ±Ð¹½Ù•É…±°ôôôŸšr’ö;¢Î¦G–&ËŽ
-0œ¤¹™½É… ¡àôù‰åAÉ•™mà¹É•ÍÕ±Ð¹ÁÉ•™•ÑÕÉ•tô¡‰åAÉ•™mà¹É•ÍÕ±Ð¹ÁÉ•™•ÑÕÉ•uñðÀ¤¬Ä¤ì(€€€=‰©•Ð¹•¹ÑÉ¥•Ì¡‰åAÉ•˜¤¹Í½ÉÐ ¡„±ˆ¤ôù‰lÅtµ…lÅuññ…lÁt¹±½…±•½µÁ…É”¡‰lÁt°©„œ¤¤¹™½É… ¡ØôùÍÕµµ…Éä¹…‘‘I½Ü¡Ø¤¤ì((€€€½¹ÍÐÝÌõÝˆ¹…‘‘]½É­Í¡••Ð Ÿ–"“–ºkžÖCšzpœ±íÙ¥•ÝÌémíÍÑ…Ñ”è™É½é•¸œ±áMÁ±¥ÐèÌ±åMÁ±¥ÐèÅõuô¤ì(€€€½¹ÍÐ‘•Ñ…¥±!•…‘•ÉÌõlŸ¦k–âãšf¦ZO¦†4£¢úóŽÿšÏ–ºhŠœ°Ÿ¦k–âãš¶“–ê_Ž#–2[žV«ŽG–öO’âxœ°Ÿ¦k–âã–ÚÇ¦†4£–:ÏŽ_Ž
-¤œ°Ÿ–në–ºkšº/š–·šf¦ZO–6c’ú„œ°Ÿ–në–ºkšº/š–·–þ¢š–6c’ú„£¦®cŽšZä¤œ°Ÿ–në–ºkšº/š–·–Þ»¦†4£–:ÏŽ_Ž
-¤œ°Ÿ¢¦›žR£šf¦ZO¦†4£¢úóŽÿšÏ–ºh¤œ°Ÿ¢¦›žR£šf¦ZO¦†4£–"—¦SšÏ–ºh¤œ°Ÿ¢¦›žR£–Þ»¦†4£–:ÏŽ_Ž
-¤œ°Ÿ¢¦›žR£–në–ºkšº/š–·šf¦ZO–6c’ú„œ°Ÿ¢¦›žR£–në–ºkšº/š–·–þ¢š–6c’ú„£¦®cŽšZä¤œ°Ÿ¢¦›žR£–në–ºkšº/š–·–Þ»¦†4£–:ÏŽ_Ž
-¤tì(€€€½¹ÍÐ¡•…‘•ÉÌõl¸¸¹±•™Ñ!•…‘•ÉÌ ¤°¸¸¹‘•Ñ…¥±!•…‘•ÉÌ°¸¸¹½É¥¥¹…±!•…‘•ÉÍ½ÉáÁ½ÉÐ ¥tìÝÌ¹…‘‘I½Ü¡¡•…‘•ÉÌ¤ìÍÑå±•!•…‘•È¡ÝÌ¹•ÑI½Ü Ä¤¤ìÝÌ¹…ÕÑ½¥±Ñ•Èõí™É½´éíÉ½ÜèÄ±½±Õµ¸èÅô±Ñ¼éíÉ½ÜèÄ±½±Õµ¸é¡•…‘•ÉÌ¹±•¹Ñ¡õôì(€€€ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹Í½ÉÐ ¡„±ˆ¤ôùÁÉ¥½É¥Ñä¡„¹É•ÍÕ±Ð¤µÁÉ¥½É¥Ñä¡ˆ¹É•ÍÕ±Ð¥ññ„¹¥¹‘•àµˆ¹¥¹‘•à¤¹™½É…  ¡íÉ½Ü±É•ÍÕ±ÐéÉô¤ôùì(€€€€€½¹ÍÐ‘•Ñ…¥±Ìõm‘•Ñ…¥±Y…±Õ”¡È¹É•Õ±…È°¥¹±Õ‘•‘!½ÕÉ±äœ¤±‘•Ñ…¥±Y…±Õ”¡È¹É•Õ±…È°Í•Á…É…Ñ•!½ÕÉ±äœ¤±‘•Ñ…¥±Y…±Õ”¡È¹É•Õ±…È°‘¥™˜œ¤±‘•Ñ…¥±Y…±Õ”¡È¹™¥á•‘=Ù•ÉÑ¥µ”°™¥á•‘=Ù•ÉÑ¥µ•!½ÕÉ±äœ¤±‘•Ñ…¥±Y…±Õ”¡È¹™¥á•‘=Ù•ÉÑ¥µ”°É•ÅÕ¥É•‘=Ù•ÉÑ¥µ•!½ÕÉ±å5…àœ¤±‘•Ñ…¥±Y…±Õ”¡È¹™¥á•‘=Ù•ÉÑ¥µ”°™¥á•‘=Ù•ÉÑ¥µ•¥™˜œ¤±‘•Ñ…¥±Y…±Õ”¡È¹ÑÉ¥…±I•Õ±…È°¥¹±Õ‘•‘!½ÕÉ±äœ¤±‘•Ñ…¥±Y…±Õ”¡È¹ÑÉ¥…±I•Õ±…È°Í•Á…É…Ñ•!½ÕÉ±äœ¤±‘•Ñ…¥±Y…±Õ”¡È¹ÑÉ¥…±I•Õ±…È°‘¥™˜œ¤±‘•Ñ…¥±Y…±Õ”¡È¹ÑÉ¥…±¥á•‘=Ù•ÉÑ¥µ”°™¥á•‘=Ù•ÉÑ¥µ•!½ÕÉ±äœ¤±‘•Ñ…¥±Y…±Õ”¡È¹ÑÉ¥…±¥á•‘=Ù•ÉÑ¥µ”°É•ÅÕ¥É•‘=Ù•ÉÑ¥µ•!½ÕÉ±å5…àœ¤±‘•Ñ…¥±Y…±Õ”¡È¹ÑÉ¥…±¥á•‘=Ù•ÉÑ¥µ”°™¥á•‘=Ù•ÉÑ¥µ•¥™˜œ¥tì(€€€€€½¹ÍÐ•á•±I½ÜõÝÌ¹…‘‘I½Ü¡l¸¸¹±•™ÑY…±Õ•Ì¡È¤°¸¸¹‘•Ñ…¥±Ì°¸¸¹½É¥¥¹…±!•…‘•ÉÍ½ÉáÁ½ÉÐ ¤¹µ…À¡ ôùÉ½Ým¡tüüœœ¥t¤ì(€€€€€½±½ÉI•ÍÕ±ÑI½Ü¡•á•±I½Ü±È¤ì™½È¡±•ÐŒôÄÐíŒðôÈÔíŒ¬¬¤•á•±I½Ü¹•Ñ•±°¡Œ¤¹¹ÕµµÐôœŒ°ŒŒÀ¸Àœì(€€€€€¥˜¡È¹Í½ÕÉ•UÉ°¥ì½¹ÍÐ•±°õ•á•±I½Ü¹•Ñ•±° ÄÌ¤ì•±°¹Ù…±Õ”õíÑ•áÐèŸ–:k–*ÓžrŽkŽóŽ
-àœ±¡åÁ•É±¥¹¬éÈ¹Í½ÕÉ•UÉ±ôì•±°¹™½¹Ðõí½±½Èéí…ÉˆèÄÜÕÌô±Õ¹‘•É±¥¹”éÑÉÕ•ôìô(€€€ô¤ì(€€€ÝÌ¹½±Õµ¹Ì¹™½É…  ¡½°±¤¤ôùì½°¹Ý¥‘Ñ õ¤ðÄÌýlÄÐ°ÄÐ°ÄÐ°ÄÐ°ÄÐ°ÄÈ°ÄÄ°ÄÈ°ÌÐ°ÌÐ°ÌÐ°ÌÐ°Äáum¥uñðÄÔè¡¤ðÈÔüÄàèÄØ¤ìô¤ì(€€€là°ä°ÄÀ°ÄÅt¹™½É… ¡ŒôùÝÌ¹•Ñ½±Õµ¸¡Œ¤¹…±¥¹µ•¹ÐõíÝÉ…ÁQ•áÐéÑÉÕ”±Ù•ÉÑ¥…°èÑ½Àô¤ì((€€€½¹ÍÐµÜõÝˆ¹…‘‘]½É­Í¡••Ð Ÿšr’ö;¢Î¦GŽ{Ž
-çŽ
-üœ±íÙ¥•ÝÌémíÍÑ…Ñ”è™É½é•¸œ±åMÁ±¥ÐèÅõuô¤ì(€€€µÜ¹…‘‘I½Ü¡lŸ¦÷¦O–êsžr3Ž
-ÏŽóŽ$œ°Ÿ¦÷¦O–êsžr0œ°Ÿš^Ÿžfë–*çš^”œ°Ÿš^Ÿšr’ö;¢Î¦Dœ°ŸšZÃžfë–*çš^”œ°ŸšZÃšr’ö;¢Î¦Dœ°Ÿ–:k–*ÓžrUI0t¤ìÍÑå±•!•…‘•È¡µÜ¹•ÑI½Ü Ä¤¤ì(€€€ÍÑ…Ñ”¹µ¥¹¥µÕµ]…”¹É•½É‘Ì¹™½É… ¡É•Œôùì½¹ÍÐÉÈõµÜ¹…‘‘I½Ü¡mÉ•Œ¹½‘”±É•Œ¹ÁÉ•™•ÑÕÉ”±É•Œ¹½±‘™™•Ñ¥Ù•…Ñ”±É•Œ¹½±‘]…”±É•Œ¹¹•Ý™™•Ñ¥Ù•…Ñ”±É•Œ¹¹•Ý]…”°Ÿ–:k–*ÓžrŽkŽóŽ
-àt¤ìÉÈ¹•Ñ•±° Ü¤¹Ù…±Õ”õíÑ•áÐèŸ–:k–*ÓžrŽkŽóŽ
-àœ±¡åÁ•É±¥¹¬éÉ•Œ¹Í½ÕÉ•UÉ±ôìÉÈ¹•Ñ•±° Ü¤¹™½¹Ðõí½±½Èéí…ÉˆèÄÜÕÌô±Õ¹‘•É±¥¹”éÑÉÕ•ôìô¤ì(€€€µÜ¹½±Õµ¹ÌõmíÝ¥‘Ñ èÄÙô±íÝ¥‘Ñ èÄÑô±íÝ¥‘Ñ èÄÑô±íÝ¥‘Ñ èÄÑô±íÝ¥‘Ñ èÄÑô±íÝ¥‘Ñ èÄÑô±íÝ¥‘Ñ èÈÉõtìµÜ¹…ÕÑ½¥±Ñ•Èõí™É½´èÄœ±Ñ¼é‘íµÜ¹É½Ý½Õ¹Ñõôì(€€€½¹ÍÐ‰Õ˜õ…Ý…¥ÐÝˆ¹á±Íà¹ÝÉ¥Ñ•	Õ™™•È ¤ì‘½Ý¹±½…‘	±½ˆ¡¹•Ü	±½ˆ¡m‰Õ™t±íÑåÁ”è…ÁÁ±¥…Ñ¥½¸½Ù¹¹½Á•¹áµ±™½Éµ…ÑÌµ½™™¥•‘½Õµ•¹Ð¹ÍÁÉ•…‘Í¡••Ñµ°¹Í¡••Ðô¤±€‘í‰…Í•9…µ” ¥õšr’ö;¢Î¦G–"“–ºi|‘í‘…Ñ•MÑ…µÀ ¥ô¹á±Íá€¤ì(€ô(€™Õ¹Ñ¥½¸ÍÑå±•!•…‘•È¡É½Ü¥ìÉ½Ü¹™½¹Ðõí‰½±éÑÉÕ”±½±½Èéí…ÉˆèõôìÉ½Ü¹™¥±°õíÑåÁ”èÁ…ÑÑ•É¸œ±Á…ÑÑ•É¸èÍ½±¥œ±™½±½Èéí…ÉˆèÌÐÐÀÔÐõôìÉ½Ü¹…±¥¹µ•¹ÐõíÙ•ÉÑ¥…°èµ¥‘‘±”ôìô(€™Õ¹Ñ¥½¸½±½ÉI•ÍÕ±ÑI½Ü¡É½Ü±È¥ì(€€€½¹ÍÐ™¥±°õÈ¹½Ù•É…±°ôôôŸšr’ö;¢Î¦G–&ËŽ
-0œüÑÈœéÈ¹½Ù•É…±°ôôôŸ¢šžŠë¢ª4œüÑ	œéÈ¹½Ù•É…±°ôôô=,œüÌœèÉÑÜœì(€€€lÄ°Ét¹™½É… ¡ŒôùÉ½Ü¹•Ñ•±°¡Œ¤¹™¥±°õíÑåÁ”èÁ…ÑÑ•É¸œ±Á…ÑÑ•É¸èÍ½±¥œ±™½±½Èéí…Éˆé™¥±±õô¤ì(€ô((€•±Ì¹ÍÙ¥±”¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ±…Íå¹Œ”ôùì(€€€±•…ÉÉÉ½È ¤ì½¹ÍÐ™¥±”õ”¹Ñ…É•Ð¹™¥±•Ì˜™”¹Ñ…É•Ð¹™¥±•ÍlÁtì¥˜ …™¥±”¥É•ÑÕÉ¸ì(€€€ÑÉåì(€€€€€¥˜ …ÍÑ…Ñ”¹µ…ÍÑ•ÉÌ¤…Ý…¥Ð±½…‘…Ñ„ ¤ì½¹ÍÐ‘•½‘•õ‘•½‘•ÍØ¡…Ý…¥Ð™¥±”¹…ÉÉ…å	Õ™™•È ¤¤±Á…ÉÍ•õÁ…ÉÍ•ÍØ¡‘•½‘•¹Ñ•áÐ¤ì(€€€€€ÍÑ…Ñ”¹É½ÝÌõÁ…ÉÍ•¹É½ÝÌìÍÑ…Ñ”¹¡•…‘•ÉÌõÁ…ÉÍ•¹¡•…‘•ÉÌìÍÑ…Ñ”¹•¹½‘¥¹œõ‘•½‘•¹•¹½‘¥¹œìÍÑ…Ñ”¹™¥±•9…µ”õ™¥±”¹¹…µ”ì•±Ì¹™¥±•9…µ”¹Ñ•áÑ½¹Ñ•¹Ðõ™¥±”¹¹…µ”ì(€€€€€•±Ì¹™¥±•5•Ñ„¹¡¥‘‘•¸õ™…±Í”ì•±Ì¹™¥±•5•Ñ„¹Ñ•áÑ½¹Ñ•¹Ðõ€‘í™¥±”¹¹…µ•÷¾ösšZ–¶_Ž
-ÏŽóŽ$è€‘í‘•½‘•¹•¹½‘¥¹÷¾öp‘íÍÑ…Ñ”¹É½ÝÌ¹±•¹Ñ ¹Ñ½1½…±•MÑÉ¥¹œ ©„µ)@œ¥÷’îÛ¾öp‘íÍÑ…Ñ”¹¡•…‘•ÉÌ¹±•¹Ñ¡÷–"]€ì(€€€€€…¹…±åé•±° ¤ì(€€€õ…Ñ ¡•ÉÈ¥ì½¹Í½±”¹•ÉÉ½È¡•ÉÈ¤ìÍ¡½ÝÉÉ½È¡•ÉÈ¹µ•ÍÍ…•ññMÑÉ¥¹œ¡•ÉÈ¤¤ì•±Ì¹É•ÍÕ±ÑM•Ñ¥½¸¹¡¥‘‘•¸õÑÉÕ”ìô(€ô¤ì(€•±Ì¹…¹…±åÍ¥Í…Ñ”¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ±…¹…±åé•±°¤ì(€m•±Ì¹™¥±Ñ•ÉMÑ…ÑÕÌ±•±Ì¹™¥±Ñ•ÉAÕ‰±¥…Ñ¥½¸±•±Ì¹™¥±Ñ•ÉAÉ•™•ÑÕÉ•t¹™½É… ¡•°ôù•°¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¡…¹”œ° ¤ôùíÍÑ…Ñ”¹Á…”ôÄíÉ•¹‘•ÉQ…‰±” ¤íô¤¤ì(€•±Ì¹™¥±Ñ•ÉM•…É ¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ¥¹ÁÕÐœ° ¤ôùíÍÑ…Ñ”¹Á…”ôÄíÉ•¹‘•ÉQ…‰±” ¤íô¤ì(€•±Ì¹ÁÉ•ÙA…”¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ° ¤ôùí¥˜¡ÍÑ…Ñ”¹Á…”øÄ¥íÍÑ…Ñ”¹Á…”´´íÉ•¹‘•ÉQ…‰±” ¤íõô¤ì•±Ì¹¹•áÑA…”¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ° ¤ôùíÍÑ…Ñ”¹Á…”¬¬íÉ•¹‘•ÉQ…‰±” ¤íô¤ì(€•±Ì¹‘½Ý¹±½…‘ÍØ¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ° ¤ôù‘½Ý¹±½…‘ÍØ¡ÍÑ…Ñ”¹É•ÍÕ±ÑÌ°œœ¤¤ì(€•±Ì¹‘½Ý¹±½…‘ÑÑ•¹Ñ¥½¹ÍØ¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ° ¤ôù‘½Ý¹±½…‘ÍØ¡ÍÑ…Ñ”¹É•ÍÕ±ÑÌ¹™¥±Ñ•È¡àôùlŸšr’ö;¢Î¦G–&ËŽ
-0œ°Ÿ¢šžŠë¢ª4t¹¥¹±Õ‘•Ì¡à¹É•ÍÕ±Ð¹½Ù•É…±°¤¤°¢š–¾û–þsŽ»Žüœ¤¤ì(€•±Ì¹‘½Ý¹±½…‘á•°¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ±¥¬œ° ¤ôù‘½Ý¹±½…‘á•° ¤¹…Ñ ¡•ÉÈôùí½¹Í½±”¹•ÉÉ½È¡•ÉÈ¤íÍ¡½ÝÉÉ½È¡á•³žRš"CŽ
-£Ž§Žðè€‘í•ÉÈ¹µ•ÍÍ…•ññ•ÉÉõ€¤íô¤¤ì((€±½…‘…Ñ„ ¤¹…Ñ ¡•ÉÈôùÍ¡½ÝÉÉ½È¡ƒŽ{Ž
-çŽ
-ÿ¢ª·¢úóŽ
-£Ž§Žðè€‘í•ÉÈ¹µ•ÍÍ…•ññ•ÉÉõ€¤¤ì)ô¤ ¤ì(
+  function makeCsvText(matrix){ return [matrix.headers,...matrix.rows].map(r=>r.map(csvEscape).join(',')).join('\r\n'); }
+  function downloadBlob(blob,name){ const url=URL.createObjectURL(blob),a=document.createElement('a'); a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000); }
+  function baseName(){ return (state.fileName||'result').replace(/\.csv$/i,'').replace(/[\\/:*?"<>|]/g,'_'); }
+  function dateStamp(){ return (els.analysisDate.value||todayLocal()).replace(/-/g,''); }
+  function downloadCsv(items,suffix){
+    const text=makeCsvText(exportMatrix(items));
+    const unicode=Encoding.stringToCode(text),sjis=Encoding.convert(unicode,{to:'SJIS',from:'UNICODE'}),bytes=new Uint8Array(sjis);
+    downloadBlob(new Blob([bytes],{type:'text/csv;charset=shift_jis'}),`${baseName()}_æœ€ä½Žè³ƒé‡‘åˆ¤å®š_${dateStamp()}${suffix||''}.csv`);
+  }
+
+  function detailValue(a,key){ const v=a&&a[key]; return typeof v==='number'&&Number.isFinite(v)?v:null; }
+  async function downloadExcel(){
+    const wb=new ExcelJS.Workbook(); wb.creator='minimum-wage-checker'; wb.created=new Date();
+    const summary=wb.addWorksheet('ã‚µãƒžãƒª',{views:[{state:'frozen',ySplit:1}]});
+    summary.columns=[{width:24},{width:16}]; summary.addRow(['é …ç›®','ä»¶æ•°']);
+    const vals=[['å…¨æ±‚äºº',state.results.length],['æœ€ä½Žè³ƒé‡‘å‰²ã‚Œ',state.results.filter(x=>x.result.overall==='æœ€ä½Žè³ƒé‡‘å‰²ã‚Œ').length],['ç·Šæ€¥',state.results.filter(x=>x.result.urgency==='ç·Šæ€¥').length],['æ”¹å®šå‰è¦å¯¾å¿œ',state.results.filter(x=>x.result.urgency==='æ”¹å®šå‰è¦å¯¾å¿œ').length],['è¦ç¢ºèª',state.results.filter(x=>x.result.overall==='è¦ç¢ºèª').length],['OK',state.results.filter(x=>x.result.overall==='OK').length],['å¯¾è±¡å¤–',state.results.filter(x=>x.result.overall==='å¯¾è±¡å¤–').length]];
+    vals.forEach(v=>summary.addRow(v));
+    styleHeader(summary.getRow(1));
+    summary.addRow([]); summary.addRow(['éƒ½é“åºœçœŒ','æœ€ä½Žè³ƒé‡‘å‰²ã‚Œä»¶æ•°']); styleHeader(summary.getRow(summary.rowCount));
+    const byPref={}; state.results.filter(x=>x.result.overall==='æœ€ä½Žè³ƒé‡‘å‰²ã‚Œ').forEach(x=>byPref[x.result.prefecture]=(byPref[x.result.prefecture]||0)+1);
+    Object.entries(byPref).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'ja')).forEach(v=>summary.addRow(v));
+
+    const ws=wb.addWorksheet('åˆ¤å®šçµæžœ',{views:[{state:'frozen',xSplit:3,ySplit:1}]});
+    const detailHeaders=['é€šå¸¸æ™‚é–“é¡(è¾¼ã¿æƒ³å®š)','é€šå¸¸æ™‚é–“é¡(åˆ¥é€”æƒ³å®š)','é€šå¸¸å·®é¡(åŽ³ã—ã‚)','å›ºå®šæ®‹æ¥­æ™‚é–“å˜ä¾¡','å›ºå®šæ®‹æ¥­å¿…è¦å˜ä¾¡(é«˜ã„æ–¹)','å›ºå®šæ®‹æ¥­å·®é¡(åŽ³ã—ã‚)','è©¦ç”¨æ™‚é–“é¡(è¾¼ã¿æƒ³å®š)','è©¦ç”¨æ™‚é–“é¡(åˆ¥é€”æƒ³å®š)','è©¦ç”¨å·®é¡(åŽ³ã—ã‚)','è©¦ç”¨å›ºå®šæ®‹æ¥­æ™‚é–“å˜ä¾¡','è©¦ç”¨å›ºå®šæ®‹æ¥­å¿…è¦å˜ä¾¡(é«˜ã„æ–¹)','è©¦ç”¨å›ºå®šæ®‹æ¥­å·®é¡(åŽ³ã—ã‚)'];
+    const headers=[...leftHeaders(),...detailHeaders,...originalHeadersForExport()]; ws.addRow(headers); styleHeader(ws.getRow(1)); ws.autoFilter={from:{row:1,column:1},to:{row:1,column:headers.length}};
+    state.results.sort((a,b)=>priority(a.result)-priority(b.result)||a.index-b.index).forEach(({row,result:r})=>{
+      const details=[detailValue(r.regular,'includedHourly'),detailValue(r.regular,'separateHourly'),detailValue(r.regular,'diff'),detailValue(r.fixedOvertime,'fixedOvertimeHourly'),detailValue(r.fixedOvertime,'requiredOvertimeHourlyMax'),detailValue(r.fixedOvertime,'fixedOvertimeDiff'),detailValue(r.trialRegular,'includedHourly'),detailValue(r.trialRegular,'separateHourly'),detailValue(r.trialRegular,'diff'),detailValue(r.trialFixedOvertime,'fixedOvertimeHourly'),detailValue(r.trialFixedOvertime,'requiredOvertimeHourlyMax'),detailValue(r.trialFixedOvertime,'fixedOvertimeDiff')];
+      const excelRow=ws.addRow([...leftValues(r),...details,...originalHeadersForExport().map(h=>row[h]??'')]);
+      colorResultRow(excelRow,r); for(let c=14;c<=25;c++) excelRow.getCell(c).numFmt='#,##0.0';
+      if(r.sourceUrl){ const cell=excelRow.getCell(13); cell.value={text:'åŽšåŠ´çœãƒšãƒ¼ã‚¸',hyperlink:r.sourceUrl}; cell.font={color:{argb:'FF175CD3'},underline:true}; }
+    });
+    ws.columns.forEach((col,i)=>{ col.width=i<13?[14,14,14,14,14,12,11,12,34,34,34,34,18][i]||15:(i<25?18:16); });
+    [8,9,10,11].forEach(c=>ws.getColumn(c).alignment={wrapText:true,vertical:'top'});
+
+    const mw=wb.addWorksheet('æœ€ä½Žè³ƒé‡‘ãƒžã‚¹ã‚¿',{views:[{state:'frozen',ySplit:1}]});
+    mw.addRow(['éƒ½é“åºœçœŒã‚³ãƒ¼ãƒ‰','éƒ½é“åºœçœŒ','æ—§ç™ºåŠ¹æ—¥','æ—§æœ€ä½Žè³ƒé‡‘','æ–°ç™ºåŠ¹æ—¥','æ–°æœ€ä½Žè³ƒé‡‘','åŽšåŠ´çœURL']); styleHeader(mw.getRow(1));
+    state.minimumWage.records.forEach(rec=>{ const rr=mw.addRow([rec.code,rec.prefecture,rec.oldEffectiveDate,rec.oldWage,rec.newEffectiveDate,rec.newWage,'åŽšåŠ´çœãƒšãƒ¼ã‚¸']); rr.getCell(7).value={text:'åŽšåŠ´çœãƒšãƒ¼ã‚¸',hyperlink:rec.sourceUrl}; rr.getCell(7).font={color:{argb:'FF175CD3'},underline:true}; });
+    mw.columns=[{width:16},{width:14},{width:14},{width:14},{width:14},{width:14},{width:22}]; mw.autoFilter={from:'A1',to:`G${mw.rowCount}`};
+    const buf=await wb.xlsx.writeBuffer(); downloadBlob(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),`${baseName()}_æœ€ä½Žè³ƒé‡‘åˆ¤å®š_${dateStamp()}.xlsx`);
+  }
+  function styleHeader(row){ row.font={bold:true,color:{argb:'FFFFFFFF'}}; row.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF344054'}}; row.alignment={vertical:'middle'}; }
+  function colorResultRow(row,r){
+    const fill=r.overall==='æœ€ä½Žè³ƒé‡‘å‰²ã‚Œ'?'FFFFE4E2':r.overall==='è¦ç¢ºèª'?'FFF4EBFF':r.overall==='OK'?'FFECFDF3':'FFF2F4F7';
+    [1,2].forEach(c=>row.getCell(c).fill={type:'pattern',pattern:'solid',fgColor:{argb:fill}});
+  }
+
+  els.csvFile.addEventListener('change',async e=>{
+    clearError(); const file=e.target.files&&e.target.files[0]; if(!file)return;
+    try{
+      if(!state.masters) await loadData(); const decoded=decodeCsv(await file.arrayBuffer()),parsed=parseCsv(decoded.text);
+      state.rows=parsed.rows; state.headers=parsed.headers; state.encoding=decoded.encoding; state.fileName=file.name; els.fileName.textContent=file.name;
+      els.fileMeta.hidden=false; els.fileMeta.textContent=`${file.name}ï½œæ–‡å­—ã‚³ãƒ¼ãƒ‰: ${decoded.encoding}ï½œ${state.rows.length.toLocaleString('ja-JP')}ä»¶ï½œ${state.headers.length}åˆ—`;
+      analyzeAll();
+    }catch(err){ console.error(err); showError(err.message||String(err)); els.resultSection.hidden=true; }
+  });
+  els.analysisDate.addEventListener('change',analyzeAll);
+  [els.filterStatus,els.filterPublication,els.filterPrefecture].forEach(el=>el.addEventListener('change',()=>{state.page=1;renderTable();}));
+  els.filterSearch.addEventListener('input',()=>{state.page=1;renderTable();});
+  els.prevPage.addEventListener('click',()=>{if(state.page>1){state.page--;renderTable();}}); els.nextPage.addEventListener('click',()=>{state.page++;renderTable();});
+  els.downloadCsv.addEventListener('click',()=>downloadCsv(state.results,''));
+  els.downloadAttentionCsv.addEventListener('click',()=>downloadCsv(state.results.filter(x=>['æœ€ä½Žè³ƒé‡‘å‰²ã‚Œ','è¦ç¢ºèª'].includes(x.result.overall)),'_è¦å¯¾å¿œã®ã¿'));
+  els.downloadExcel.addEventListener('click',()=>downloadExcel().catch(err=>{console.error(err);showError(`Excelç”Ÿæˆã‚¨ãƒ©ãƒ¼: ${err.message||err}`);}));
+
+  loadData().catch(err=>showError(`ãƒžã‚¹ã‚¿èª­è¾¼ã‚¨ãƒ©ãƒ¼: ${err.message||err}`));
+})();
