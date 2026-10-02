@@ -137,7 +137,7 @@
   }
 
   function trialHasAny(row) {
-    return ['給与区分(試用期間)','給与金額MIN(試用期間)','平均所定労働時間(試用期間)'],'固定残業代の支払額(試用期間)'],'固定残業時間(試用期間)']].some(k=>!blank(row[k]));
+    return ['給与区分(試用期間)','給与金額MIN(試用期間)','平均所定労働時間(試用期間)','固定残業代の支払額(試用期間)','固定残業時間(試用期間)'].some(k=>!blank(row[k]));
   }
 
   function summarizeOverall(axes) {
@@ -185,7 +185,7 @@
       return {...base, regular:rv,fixedOvertime:axis(STATUS.NA,'判定保留'),trialRegular:axis(STATUS.NA,'判定保留'),trialFixedOvertime:axis(STATUS.NA,'判定保留'),overall:OVERALL.REVIEW,urgency:urgency(OVERALL.REVIEW,pubCode,analysisDate,wage&&wage.newEffectiveDate,publicationKnown)};
     }
     if (!wage) {
-      const rv=axis(STATUS.REVIEW, '県コード1が空白また最低賃金マスタ未登録');
+      const rv=axis(STATUS.REVIEW, '県コード1が空白または最低賃金マスタ未登録');
       return {...base, regular:rv,fixedOvertime:axis(STATUS.NA,'判定保留'),trialRegular:axis(STATUS.NA,'判定保留'),trialFixedOvertime:axis(STATUS.NA,'判定保留'),overall:OVERALL.REVIEW,urgency:urgency(OVERALL.REVIEW,pubCode,analysisDate,null,publicationKnown)};
     }
     if (!analysisDate) {
