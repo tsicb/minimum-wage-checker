@@ -1,0 +1,9 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>minimum-wage-checker tests</title><style>body{font-family:monospace;padding:24px} .pass{color:#067647}.fail{color:#b42318} li{margin:4px 0}</style></head><body><h1>判定ロジックテスト</h1><p id="summary">実行中...</p><ol id="list"></ol>
+<script src="../js/core.js"></script><script src="test-cases.js"></script><script>
+const core=MinimumWageCheckerCore,cases=MinimumWageTestCases;
+const masters={employment:{'1':'正社員','2':'契約社員','3':'アルバイト・パート','9':'業務委託','99':'その他'},publication:{'1':'作成中','2':'未公開','3':'公開予約','6':'公開中','7':'公開失敗'},payType:{'1':'時給','2':'日給','3':'月給','4':'年俸','5':'年収','6':'完全歩合制','99':'その他'},prefectures:{'99':'テスト県'}};
+const wageByCode={'99':{code:'99',prefecture:'テスト県',newWage:1200,newEffectiveDate:'2026-10-01',sourceUrl:'https://example.com'}};
+let fail=0; const list=document.getElementById('list');
+for(const tc of cases){const r=core.analyzeRow(tc.row,{masters,wageByCode,analysisDate:tc.date});const actual={overall:r.overall,urgency:r.urgency,regular:r.regular.status,fixedOvertime:r.fixedOvertime.status,trialRegular:r.trialRegular.status,trialFixedOvertime:r.trialFixedOvertime.status};const errors=[];for(const[k,v]of Object.entries(tc.expect))if(actual[k]!==v)errors.push(`${k}: expected=${v} actual=${actual[k]}`);const li=document.createElement('li');li.className=errors.length?'fail':'pass';li.textContent=(errors.length?'FAIL ':'PASS ')+tc.name+(errors.length?' / '+errors.join(' / '):'');list.appendChild(li);if(errors.length)fail++;}
+document.getElementById('summary').textContent=`${cases.length-fail}/${cases.length} passed`;document.getElementById('summary').className=fail?'fail':'pass';
+</script></body></html>
