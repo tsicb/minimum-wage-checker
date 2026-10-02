@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>最低賃金チェッカー</title>
+  <meta name="description" content="求人CSVをブラウザ内で解析し、最低賃金割れ・要確認求人を抽出します。">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Minimum Wage Checker</p>
+        <h1>最低賃金チェッカー</h1>
+        <p class="lead">求人CSVをブラウザ内だけで解析し、最低賃金割れ・改定前要対応・要確認求人を見つけます。</p>
+      </div>
+      <div class="privacy-note">CSVは外部サーバーへ送信しません</div>
+    </header>
+
+    <section class="panel upload-panel" aria-labelledby="input-title">
+      <div class="section-head">
+        <div>
+          <h2 id="input-title">1. CSVを読み込む</h2>
+          <p>入力.csv と同形式のCSVを選択してください。CP932 / Shift_JIS と UTF-8 を自動判定します。</p>
+        </div>
+      </div>
+      <div class="upload-grid">
+        <label class="file-box" for="csvFile">
+          <span class="file-box-title">CSVファイルを選択</span>
+          <span id="fileName" class="muted">未選択</span>
+          <input id="csvFile" type="file" accept=".csv,text/csv">
+        </label>
+        <label class="date-box">
+          <span>CSVダウンロード日</span>
+          <input id="analysisDate" type="date">
+          <small>最低賃金額は常に改定後額を使い、この日付は緊急度判定に使用します。</small>
+        </label>
+      </div>
+      <div id="fileMeta" class="file-meta" hidden></div>
+      <div id="errorBox" class="alert error" hidden></div>
+    </section>
+
+    <section id="resultSection" class="result-section" hidden>
+      <section class="summary-grid" aria-label="判定サマリ">
+        <article class="summary-card"><span>全件</span><strong id="countTotal">0</strong></article>
+        <article class="summary-card danger"><span>緊急</span><strong id="countUrgent">0</strong></article>
+        <article class="summary-card warning"><span>改定前要対応</span><strong id="countUpcoming">0</strong></article>
+        <article class="summary-card review"><span>要確認</span><strong id="countReview">0</strong></article>
+        <article class="summary-card ok"><span>OK</span><strong id="countOk">0</strong></article>
+        <article class="summary-card muted-card"><span>対象外</span><strong id="countExcluded">0</strong></article>
+      </section>
+
+      <section class="panel controls-panel">
+        <div class="section-head compact">
+          <div>
+            <h2>2. 判定結果を確認</h2>
+            <p id="resultCaption">要対応・要確認を優先表示します。</p>
+          </div>
+          <div class="download-actions">
+            <button id="downloadExcel" class="btn primary" type="button">Excelダウンロード</button>
+            <button id="downloadCsv" class="btn" type="button">CSVダウンロード</button>
+            <button id="downloadAttentionCsv" class="btn" type="button">要対応のみCSV</button>
+          </div>
+        </div>
+        <div class="filters">
+          <label>表示
+            <select id="filterStatus">
+              <option value="attention" selected>要対応・要確認</option>
+              <option value="all">全件</option>
+              <option value="ng">最低賃金割れ</option>
+              <option value="review">要確認</option>
+              <option value="ok">OK</option>
+              <option value="excluded">対象外</option>
+            </select>
+          </label>
+          <label>公開状態
+            <select id="filterPublication"><option value="all">すべて</option></select>
+          </label>
+          <label>都道府県
+            <select id="filterPrefecture"><option value="all">すべて</option></select>
+          </label>
+          <label class="search-label">検索
+            <input id="filterSearch" type="search" placeholder="求人管理番号・仕事名">
+          </label>
+        </div>
+      </section>
+
+      <section class="table-panel">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>緊急度</th><th>総合判定</th><th>求人管理番号</th><th>仕事名</th><th>公開状態</th><th>都道府県</th><th>最賃</th>
+                <th>通常賃金</th><th>固定残業</th><th>試用賃金</th><th>試用固定残業</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="prevPage" class="btn small" type="button">前へ</button>
+          <span id="pageInfo">1 / 1</span>
+          <button id="nextPage" class="btn small" type="button">次へ</button>
+        </div>
+      </section>
+
+      <section class="panel note-panel">
+        <h2>判定上の注意</h2>
+        <ul>
+          <li>月給等に固定残業代が含まれるか不明な場合は「込み想定」「別途想定」の両方を計算し、結果が分かれる場合は要確認にします。</li>
+          <li>勤務形態が空白ではなく固定残業代の支払額が空白の場合は「固定残業制度なし」と判定します。試用期間も同様です。</li>
+          <li>年収は賞与等を含む可能性があるため参考換算とし、自動的にOK確定にはしません。</li>
+        </ul>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/encoding-japanese@2.2.0/encoding.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
